@@ -13,7 +13,7 @@ $setup[] = "SET time_zone = \"+00:00\";";
 $setup[] = "CREATE TABLE `[pre_]user_config` (
   `user_config_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `user_module` varchar(20) NOT NULL,
+  `user_library` varchar(20) NOT NULL,
   `user_key` varchar(15) NOT NULL,
   `value` text,
   `timestamp` int(11) NOT NULL
@@ -21,7 +21,7 @@ $setup[] = "CREATE TABLE `[pre_]user_config` (
 
 $setup[] = "CREATE TABLE `[pre_]user_default_config` (
   `user_default_config_id` int(11) NOT NULL,
-  `user_module` varchar(20) NOT NULL,
+  `user_library` varchar(20) NOT NULL,
   `user_key` varchar(20) NOT NULL,
   `value` text,
   `timestamp` int(11) NOT NULL

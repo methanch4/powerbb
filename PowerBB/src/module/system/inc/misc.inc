@@ -540,7 +540,7 @@
 		{
 			if ($a==0) $rnd = random_int(0,51); // first sign MUST be a character
 			else $rnd = random_int(0,61);
-            $string .= $encode_string{$rnd};
+            $string .= $encode_string[$rnd];
 		}
 		return $string;
 	}
@@ -769,7 +769,7 @@
 	function return_kbytes($val)
 	{
 		$val = trim($val);
-		$last = strtolower($val{strlen($val)-1});
+		$last = strtolower($val[strlen($val)-1]);
 		switch($last)
 		{
 			// The 'G' modifier is available since PHP 5.1.0

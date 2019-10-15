@@ -12,10 +12,10 @@
 	
 	/**
 	 * @global cSystem $system
-	 * @param integer $cid
-	 * @param integer $name
-	 * @param boolean $param
-	 * @param string $class
+	 * @param integer $cid Die CID des Systems
+	 * @param string $name Die Zeichenkette die als Link angezeigt werden soll
+	 * @param array[string]=>string $param key=>value als Parameter des Links 
+	 * @param string $class Die CSS-Klasse in der der String angezeigt werden soll
 	 * @return string
 	 */
 	function generate_link($cid, $name, $param=false, $class="link_default")

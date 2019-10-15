@@ -33,6 +33,11 @@
 		private $module = "";
 		
 		/**
+		 * @var string		Die Bibliothek, zu dem diese Einstellung gehört
+		 */
+		private $library = "";
+		
+		/**
 		 * @var string		Der Schlüssel zu dieser Einstellung
 		 */
 		private $key = "";
@@ -56,9 +61,10 @@
 		private $user_id = -1;
 		
 		
-		public function __construct($module, $key, $user_id)
+		public function __construct($module, $library, $key, $user_id)
 		{
 			$this->module = $module;
+			$this->library = $library;
 			$this->key = $key;
 			$this->user_id = $user_id;
 		}
@@ -82,28 +88,28 @@
 				$result = $database->query("SELECT   `[pre_]user_config`.`value` \n"
 						                . " FROM     `[pre_]user_config` \n"
 						                . " WHERE    `[pre_]user_config`.`user_id` = '".$this->user_id."' \n"  
-										     . " AND `[pre_]user_config`.`user_module` = '".$this->module."' \n"
+										     . " AND `[pre_]user_config`.`user_library` = '".$this->library."' \n"
                                              . " AND `[pre_]user_config`.`user_key` = '".$this->key."' \n"
 										. " ORDER BY `[pre_]user_config`.`timestamp` DESC \n"
 										. " LIMIT 1;"
 						);
 				
-				if($result->length == 0)
+				if($result->count() == 0)
 				{
 					// der Benutzer hat keine individuelle Einstellung für dieses Setup hinterlegt. Wir suchen nun in der Globalen Datenbank
 					$result1 = $database->query("SELECT   `[pre_]user_default_config`.`value` \n"
 											  ." FROM     `[pre_]user_default_config` \n" 
-											  ." WHERE    `[pre_]user_default_config`.`user_module` = '".$this->module."' \n"
+											  ." WHERE    `[pre_]user_default_config`.`user_library` = '".$this->library."' \n"
 												  . " AND `[pre_]user_default_config`.`user_key` = '".$this->key."' \n"
                                              . " ORDER BY `[pre_]user_default_config`.`timestamp` DESC \n"
 											 . " LIMIT 1;"
 						);
-					if($result1->length == 0)
+					if($result1->count() == 0)
 					{
 						$__user_setting = false;
 						// Es gibt im Moment auch keine Globale einstellung für diese Eingschaft in der Datebank.
 						// Lade die Default-Einstellungen für dieses Modul und überprüfe ob wir eine globale Einstellung setzen können.
-						$filename = "./inc/settings/".$this->module.".inc";
+						$filename = "./module/".$this->module."/settings/".$this->library.".inc";
 						if(file_exists($filename))
 						{
 							include_once $filename;
@@ -113,17 +119,17 @@
 							// Eine Solche Datei muss es geben.
 							echo "<br><b>Fataler Fehler:</b> Die Datei <tt><b>$filename</b></tt> existiert nicht.";
 							echo "Gesucht wird der Parameter:<br>";
-							echo "Modul: <tt>".$this->module."</tt> --- Key: <tt>".$this->key."</tt><br>";
+							echo "Modul: <tt>".$this->module."</tt> --- Library: <tt>".$this->library."</tt>--- Key: <tt>".$this->key."</tt><br>";
 							kill(1);
 						}
 						
 						// Sollten passende Einstellungen gefunden worden sein, übertrage die Einstellung in den Cache und speicher sie gleich
 						// auch in der Datenbank für globale Einstellungen. 
-						if(isset($__user_setting[$this->module][$this->key]))
+						if(isset($__user_setting[$this->library][$this->key]))
 						{
-							$this->value = $__user_setting[$this->module][$this->key];
-							$database->query("INSERT INTO `[pre_]user_default_config` (`user_default_config_id`, `user_module`, `user_key`, `value`, `timestamp`) 
-                                                                         VALUES (NULL, '".$this->module."', '".$this->key."', '".$this->value."', '".time()."');");
+							$this->value = $__user_setting[$this->library][$this->key];
+							$database->query("INSERT INTO `[pre_]user_default_config` (`user_default_config_id`, `user_library`, `user_key`, `value`, `timestamp`) 
+                                                                         VALUES (NULL, '".$this->library."', '".$this->key."', '".$this->value."', '".time()."');");
 						}
 						else
 						{
@@ -131,6 +137,7 @@
 							// Das ist ein schwerer Fehler
 							echo "Es wurden keine Benutzereigenschaften für hinterlegt für: <br />";
 							echo "<b>Modul:</b> <tt>".$this->module."</tt> <br />";
+							echo "<b>Library:</b> <tt>".$this->library."</tt> <br />";
 							echo "<b>Schlüssel:</b> <tt>".$this->key."</tt> <br />";
 							kill(-1);
 						}
@@ -349,7 +356,7 @@
 			// wird hier überprüft ob
 			$result = $database->query("SHOW TABLES WHERE `Tables_in_".$database->db_name."` LIKE '[pre_]cms_%' ");
 			
-			if($result->count == 0)
+			if($result->count() == 0)
 			{
 				// Es wurden noch keine CMS-Tabellen angelegt. Hole dieses jetzt nach.
 					
@@ -358,7 +365,7 @@
 								
 				// Lade die SQL-Informationen zum erstellen der Tabellen
 				$setup = array();
-				include "./inc/settings/cms_sql.inc";
+				include "./module/system/settings/sql_cms.inc";
 				
 				// Installiere die Tabellen
 				foreach($setup as $line) $database->query($line);
@@ -433,7 +440,7 @@
 						);
 				
 				// only if there is an result and this result is "yes" this user is Member of this group.
-				if($query1->count > 0)
+				if($query1->count() > 0)
 				{
 					if($query1->get_word() == "yes")
 					{
@@ -477,7 +484,7 @@
 		 * @param integer $group_id
 		 * @global cDatabase $database
 		 */
-		private function add_this_user_to_group($group_id)
+		public function add_this_user_to_group($group_id)
 		{
 			global $database;
 			
@@ -491,14 +498,14 @@
 		 * @param String $key		Der Name der Eingeschaft
 		 * @return mixed
 		 */
-		public function get_setting($module, $key)
+		public function get_setting($module, $library, $key)
 		{
 			// wurde diese Eigneschaft schon einmal ausgelesen? Wenn nicht, muss der Eintrag im cache erst einmal
 			// erzeugt und aus der DB ausgelesen werden.
-			if(!isset($this->settings[$module][$key])) $this->settings[$module][$key] = new cUser_element_property($module, $key, $this->user_id);
+			if(!isset($this->settings[$library][$key])) $this->settings[$library][$key] = new cUser_element_property($module, $library, $key, $this->user_id);
 
 			// Gib die Eigenschaft zurück
-			return $this->settings[$module][$key]->value;
+			return $this->settings[$library][$key]->value;
 		}
 		
 		/**
@@ -507,30 +514,42 @@
 		 * @param string $key
 		 * @param string $value
 		 */
-		public function set_setting($module, $key, $value)
+		public function set_setting($module, $library, $key, $value)
 		{
-			if(!isset($this->settings[$module][$key]))
+			if(!isset($this->settings[$library][$key]))
 			{
 				kill(1);
 			}
 			
-			$this->settings[$module][$key]->set_value($value);
+			$this->settings[$library][$key]->set_value($value);
 		}//function set_setting($module, $key, $value)
 		
 		/**
-		 * Lädt die Rechteliste für den Benutzer
-		 * @global cDatabase $database
+		 * Überprüft ob der Benutzer Mitgleid der Administratorengruppe ist. 
 		 * @global cSystem $system
 		 */
 		public function is_admin(): bool
 		{
-			global $database, $system;
+			global $system;
 			
-			$result1 = $database->query("SELECT `group_id` FROM `[pre_]user_groups` WHERE `name` = '__langsys_admingroup;' ORDER BY `[pre_]user_groups`.`timestamp` DESC LIMIT 1;");
-			$gid_admin = $result1->get_word();
+			$gid_admin = $system->get_config("user", "group_admin_user");;
 			
 			return($this->mog[$gid_admin]);
 		}
+
+		/**
+		 * Überprüft, ob der dieser Benutzer mitglied der Registrieten und Freigeschalteten Benutzer ist
+		 * @global cSystem $system
+		 */
+		public function is_user(): bool
+		{
+			global $system;
+			
+			$gid_user = $system->get_config("user", "group_registerd_user");;
+			
+			return($this->mog[$gid_user]);
+		}
+		
 	}//class cUser_element
 
 
@@ -588,14 +607,14 @@ class cUser_manager
 
 			$result = $database->query("SHOW TABLES WHERE `Tables_in_".$database->db_name."` LIKE '[pre_]user_%' ");
 			
-			if($result->count == 0)
+			if($result->count() == 0)
 			{
 				// Es wurde noch kein default user angelegt. Vermutlich wurde die Datenbank gerade erst
 				// erstellt. Initialisiere die Datenbank mit den grundlegenen Benutzerdaten
 				$time = time();
 				
 				$setup = array();
-				include "./inc/settings/user_sql.inc";
+				include "./module/system/settings/sql_user.inc";
 				
 				echo "Erzeuge die Benutzerdatebank.<br>";
 				flush();						
@@ -640,7 +659,7 @@ class cUser_manager
 				$system->log("user", "__construct", "initilice_userDB", "__langsys_initlice_userdb_desc;");
 			}//
 			
-			$this->login_user($system->get_config("user", "guest_user_id"));
+			$this->login_user($system->get_config("user", "guest_user_id"), "");
 		}//if
 
 		//Überprüfe ob der zu der User_ID gehörenden Benutzerdatenstamm bereits geladen wurde.
@@ -677,6 +696,11 @@ class cUser_manager
 				// die Passwortverschlüsselung verwendet werden soll, damit Rainbow-Tabellen
 				// keine Chance haben. Wird nach der Installation genau einmal aufgerufen
 				$return =  generate_password(time(), microtime(), $_SERVER["SERVER_NAME"]);
+				break;
+			case "system_config_get_add_admin_challange":
+				// Dieser Parameter soll nur in der Config Datei stehen, und den ersten (berechtigten
+				// benutzer in den Rang eines Admins erheben.
+				$return = false;
 				break;
 			default:
 				echo "cUser_manager::__get($name). Den Parameter $name gibt es nicht.";
@@ -723,9 +747,9 @@ class cUser_manager
 		$pass = generate_password($user_name, $user_pass, $salt);
 		
 		$link_1 = $database->query("SELECT `[pre_]user_list`.`user_id` FROM `[pre_]user_list` WHERE `[pre_]user_list`.`name` = '".$user_name."' AND `[pre_]user_list`.`passwd` = '".$pass."' LIMIT 1;");
-		if($link_1->count > 0)
+		if($link_1->count() > 0)
 		{
-			$this->login_user($link_1->get_word());
+			$this->login_user($link_1->get_word(), $pass);
 			$return = 0; 
 		}//if
 		else
@@ -738,19 +762,84 @@ class cUser_manager
 	}//function try_login($user_name, $user_pass)
 	
 	
-	
-	public function login_user($user_id)
+	/**
+	 * Logt Benutzer ein und überprüft ob es schon einen Admin gibt.
+	 * @global cSystem $system
+	 * @global cDatabase $database	 
+	 * @param integer $user_id
+	 */
+	public function login_user($user_id, $pass)
 	{
+		global $system, $database;
+		
 		$this->user_id = $user_id;
 		
+		// Lade Benutzerdaten, wenn sie noch nicht im System gespeichert sind
 		if(!isset($this->user_database[$this->user_id]))
 		{
 			// Wurde noch nicht geladen. Hole dies an dieser Stelle nach.
 			$this->user_database[$this->user_id] = new cUser_element($this->user_id);
 		}//if
 		
+		// Lade die Benutzerberechtigungen für die Zugriffsüberprüfung
 		$this->user_database[$this->user_id]->get_user_permissions();
-	}
+		
+		// Überprüfe ob Benutzer Mitglide der Benutzergruppe ist (also regulär angemeldet ist)
+		if($this->is_user())
+		{
+			// Teste ob schon Admins in der Liste sind.
+			$group_admin_id = $system->get_config("user", "group_admin_user");
+			$result = $database->query("SELECT `member_id` FROM `[pre_]user_member_of_group` WHERE `group_id` = ".$group_admin_id." LIMIT 1");
+			if($result->count() == 0)
+			{
+				$contend  = "";
+				
+				$_pass = $system->get_config("user", "add_admin_challange");
+				
+				if($_pass == $pass)
+				{
+					$contend .= "<b>__langsys_no_admin_user;</b><br><br>__langsys_no_admin_add_user;<br><br>\n";
+					
+					// Füge diesen Benutzer zur Admingruppe hinzu.
+					$this->user_database[$this->user_id]->add_this_user_to_group($group_admin_id);
+					
+					// Lade die Benutzerberechtigungen für die Zugriffsüberprüfung neu, um die Adminberechtigung gleich zu erhalten.
+					$this->user_database[$this->user_id]->get_user_permissions();
+					
+					// 
+					$contend .= "__langsys_no_admin_delete_string;<br>\n";
+					$contend .= "<tt>\$config[\"user\"][\"add_admin_challange\"]	= \"".$pass."\";</tt><br><br>";
+				}
+				else
+				{
+					$contend .= "<b>__langsys_no_admin_user;</b><br><br>__langsys_no_admin_user_desc;<br><br>\n";
+					$contend .= "__langsys_no_admin_challange_desc;<br>";
+					$contend .= "<tt>\$config[\"user\"][\"add_admin_challange\"]	= \"".$pass."\";</tt><br><br>";
+					$contend .= "__langsys_no_admin_challange_todo;<br>";
+					$contend .= generate_link(1, "__langsys_session_restart;", array("session_restart"=>"true"));
+				}
+				$system->add_system_massage($contend);
+			}//if
+			else
+			{
+				// Es gibt Admins.
+				if($this->user_database[$this->user_id]->is_admin())
+				{
+					// Der Benutzer ist ein Admin
+					$_pass = $system->get_config("user", "add_admin_challange");
+					if($_pass)
+					{
+						// Die Challange ist noch in der Configdatei. Sie sollte aus sicherheitsgründen aber gelöscht werden.
+						$contend  = "";
+						$contend .= "<b>__langsys_no_admin_securety_admin_challange;</b><br>";
+						$contend .= "__langsys_no_admin_delete_string;<br><br>\n";
+						$contend .= "<tt>\$config[\"user\"][\"add_admin_challange\"]	= \"".$pass."\";</tt><br><br>";
+						$system->add_system_massage($contend);
+					}
+				}//if
+			}
+		}//if
+	}//public function login_user($user_id, $pass)
 	
 	/**
 	 * @global cSystem $system
@@ -759,7 +848,7 @@ class cUser_manager
 	{
 		global $system;
 		
-		$this->login_user($system->get_config("user", "guest_user_id"));
+		$this->login_user($system->get_config("user", "guest_user_id"), "");
 		
 	}
 	
@@ -769,18 +858,18 @@ class cUser_manager
 	 * @param string 	$key
 	 * @param int 		$user_id
 	 */
-	public function get_setting($module, $key, $user_id = -1)
+	public function get_setting($module, $library, $key, $user_id = -1)
 	{
 		if($user_id == -1) $user_id = $this->user_id;
 		
-		return $this->user_database[$user_id]->get_setting($module, $key);
+		return $this->user_database[$user_id]->get_setting($module, $library, $key);
 	}
 	
-	public function set_setting($modul, $key, $value, $user_id = -1)
+	public function set_setting($modul, $library, $key, $value, $user_id = -1)
 	{
 		if($user_id == -1) $user_id = $this->user_id;
 		
-		$this->user_database[$user_id]->set_setting($modul, $key, $value);
+		$this->user_database[$user_id]->set_setting($modul, $library, $key, $value);
 	}
 	
 	public function is_admin($user_id = -1): bool
@@ -788,6 +877,13 @@ class cUser_manager
 		if($user_id == -1) $user_id = $this->user_id;
 		
 		return $this->user_database[$user_id]->is_admin();
+	}
+
+	public function is_user($user_id = -1): bool
+	{
+		if($user_id == -1) $user_id = $this->user_id;
+		
+		return $this->user_database[$user_id]->is_user();
 	}
 	
 	/**************************************************************************************************/
@@ -852,9 +948,9 @@ class cUser_manager
 		{
 			$string = window_error("__lang_linkerror_cidnf_title;", "__lang_linkerror_cidnf_body;");
 		}
-		elseif(file_exists("./contend/".$array[$this->cid]->file))
+		elseif(file_exists("./module/".$array[$this->cid]->modul."/contend/".$array[$this->cid]->file))
 		{
-			include "./contend/".$array[$this->cid]->file;
+			include "./module/".$array[$this->cid]->modul."/contend/".$array[$this->cid]->file;
 			
 			if(strlen($form_manager->prepro_action) > 0)
 			{

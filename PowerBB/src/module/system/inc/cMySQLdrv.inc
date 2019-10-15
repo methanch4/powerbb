@@ -113,10 +113,10 @@
     		
     		switch($name)
     		{
-    			case "count":
+/*    			case "count":
     			case "length":
     				$return = count($this->stored_result);
-    				break;
+    				break; */
     			case "success":
     				return $this->success;
     				break;
@@ -127,6 +127,15 @@
     		
     		return $return;
     	}//public function __get($name)
+    	
+    	/**
+    	 * Zählt die elemente die der MySQL-Server zurückgegeben hat.
+    	 * @return int
+    	 */
+    	public function count(): int
+    	{
+    		return count($this->stored_result);
+    	}
     	
     	public function get_word()
     	{

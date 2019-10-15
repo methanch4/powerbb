@@ -22,7 +22,7 @@
 		{
 			global $user;
 			
-			$this->laguage_settings = $user->get_setting("language", "lang_sel");
+			$this->laguage_settings = $user->get_setting("system", "language", "lang_sel");
 		}
 		
 		/**

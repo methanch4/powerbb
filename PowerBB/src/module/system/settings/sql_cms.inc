@@ -23,6 +23,7 @@ $setup[] = "CREATE TABLE `[pre_]cms_conted_list` (
   `name` varchar(20) NOT NULL,
   `param` text,
   `file` varchar(20) NOT NULL,
+  `modul` varchar(20) NOT NULL,
   `parent_key` int(11),
   `timestamp` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
@@ -56,13 +57,13 @@ $setup[] = "ALTER TABLE `[pre_]cms_conted_list`
 $setup[] = "ALTER TABLE `[pre_]cms_show_list`
   MODIFY `cms_show_id` int(11) NOT NULL AUTO_INCREMENT;";
 
-$setup[] = "INSERT INTO `[pre_]cms_conted_list` (`cid`, `name`, `param`, `file`, `timestamp`)
-  VALUES (NULL, 'welcome', NULL, 'start.inc', UNIX_TIMESTAMP()),
-         (NULL, 'register', NULL, 'register.inc', UNIX_TIMESTAMP()),
-		 (NULL, 'login', NULL, 'login.inc', UNIX_TIMESTAMP()),
-		 (NULL, 'admin', NULL, 'admin.inc', UNIX_TIMESTAMP()),
-		 (NULL, 'profile', NULL, 'profile.inc', UNIX_TIMESTAMP()),
-		 (NULL, 'logout', NULL, 'logout.inc', UNIX_TIMESTAMP());";
+$setup[] = "INSERT INTO `[pre_]cms_conted_list` (`cid`, `name`, `param`, `file`, `modul`, `timestamp`)
+  VALUES (NULL, 'welcome', NULL, 'start.inc', 'system', UNIX_TIMESTAMP()),
+         (NULL, 'register', NULL, 'register.inc', 'system', UNIX_TIMESTAMP()),
+		 (NULL, 'login', NULL, 'login.inc', 'system', UNIX_TIMESTAMP()),
+		 (NULL, 'admin', NULL, 'admin.inc', 'system', UNIX_TIMESTAMP()),
+		 (NULL, 'profile', NULL, 'profile.inc', 'system', UNIX_TIMESTAMP()),
+		 (NULL, 'logout', NULL, 'logout.inc', 'system', UNIX_TIMESTAMP());";
 
 
 $setup[] = "COMMIT;";

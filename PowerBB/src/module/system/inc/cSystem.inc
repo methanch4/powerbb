@@ -50,14 +50,14 @@
 			{
 				$result = $GLOBALS["database"]->query("SHOW TABLES WHERE `Tables_in_".$this->config["db"]["db"]."` LIKE '[pre_]system_%' ");
 				
-				if($result->count == 0)
+				if($result->count() == 0)
 				{
 					echo "Erzeuge die System-Datenbank.<br>";
 					flush();
 					
 					// Lade die SQL-Informationen zum erstellen der Tabellen
 					$setup = array();
-					include "./inc/settings/system_sql.inc";
+					include "./module/system/settings/sql_system.inc";
 					
 					// Installiere die Tabellen
 					foreach($setup as $line) $GLOBALS["database"]->query($line);
@@ -89,7 +89,7 @@
 			{
 				$result = $database->query("SELECT `value` FROM `[pre_]system_config` WHERE `sys_module` = '".$chapter."' AND `sys_key` = '".$key."' ORDER BY `[pre_]system_config`.`timestamp` DESC LIMIT 1");
 				
-				if($result->count == 0)
+				if($result->count() == 0)
 				{
 					$string = "system_config_get_".$key;
 					$value = $GLOBALS[$chapter]->$string;
@@ -157,7 +157,7 @@
 					$liste = "  <li>".$value."</li>\n";
 				}//foreach
 				$liste .= "</ol>\n";
-				$return = window("__langsys_system_massages_title", $liste);
+				$return = window("__langsys_system_massages_title;", $liste);
 			}//if
 			
 			return $return;

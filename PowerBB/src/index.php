@@ -21,25 +21,24 @@
 	 */
 	
 	// Klassen die das CMS managen
-	include "./inc/cSystem.inc";
-	include "./inc/cUser.inc";			// Vollumfängliche Benutzerrechteverwaltung
-	include "./inc/cForm.inc";			// Formularverwaltung mit gehärteter Sicherheit
-	
+	include "./module/system/inc/cSystem.inc";
+	include "./module/system/inc/cUser.inc";			// Vollumfängliche Benutzerrechteverwaltung
+	include "./module/system/inc/cForm.inc";			// Formularverwaltung mit gehärteter Sicherheit
 	
 	// Lädt funktionen zur Textverarbeitung
 	// (Templates, Sprachen, und Layoutvorlagen)
-	include "./inc/template.inc";
-	include "./inc/layout.inc";
-	include "./inc/cLanguage.inc";
+	include "./module/system/inc/template.inc";
+	include "./module/system/inc/layout.inc";
+	include "./module/system/inc/cLanguage.inc";
 	
 	// allgemein nützliche Funktion
-	include "./inc/misc.inc";
+	include "./module/system/inc/misc.inc";
 	
 	// Etabliere die Session 
 	session_start();
 	
 	// Lade den Datenbank-Treiber
-	include "./inc/cMySQLdrv.inc";
+	include "./module/system/inc/cMySQLdrv.inc";
 	
 	/* cSystem enthällt alle Informationen die sich um die Konfiguration
 	 * dieses CMS drehen. Es lädt die Konfigurationsdatenbank und kann
@@ -85,13 +84,11 @@
 	 */
 	$form_manager = new cForm_manager();
 	
-     /**
+	/**
 	 * @var cLanguage $language		Erzeugt und Lädt die Verwaltungsdatenbank für Formulare.
 	 */
 	$language = new cLanguage();
 	
-	
-
 	/**
 	 * Lädt die CID.
 	 * Die CID ist die Contend-ID, in der in der Datenbank des CMS der passende Inhalt zugeordnet werden kann.

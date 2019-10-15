@@ -31,4 +31,5 @@
 			<br><br><br><br>
 
 			<div id='templ_foot'>EGS - Prüfungsdatenbank - 0.01 &nbsp";
+	$lang["fnf.inc"]["login</div><div id='templ_window_box'>"] = "[lang]_login</div><div id='templ_window_box'>";
 ?>
