@@ -1,0 +1,16 @@
+{
+	"name" : "einfach_tierschutz/tshirt",
+	"require" : {
+		"shirtigo/cockpit-api-client" : "dev-master"
+	},
+	"license" : "MIT",
+	"authors" : [{
+			"name" : "Shirtigo GmbH",
+			"email" : "cockpit@shirtigo.de"
+		}, {
+			"name" : "Siegurt Skoda",
+			"email" : "sskoda@powerbb.info"
+		}
+	],
+	"minimum-stability" : "dev"
+}

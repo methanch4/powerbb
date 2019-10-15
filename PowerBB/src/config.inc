@@ -1,0 +1,16 @@
+<?php
+	
+	$config = array();
+
+	$config["main"]["projectname"] 	= "EGS - Prüfungsdatenbank";
+	$config["main"]["version"] 		= "0.01";
+	$config["main"]["index"]		= "index.php";
+	$config["main"]["start_cid"]	= 1;
+	
+	$config["db"]["host"]			= "localhost";
+	$config["db"]["user"]			= "raspberry";
+	$config["db"]["pass"]			= "pipi";
+	$config["db"]["db"]				= "egs_db_001";
+	$config["db"]["prefix"]			= "powerbb_";
+	
+?>
